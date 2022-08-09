@@ -1,14 +1,16 @@
 package run.halo.app.model.dto;
 
+import java.util.Date;
 import lombok.Data;
 import run.halo.app.model.dto.base.OutputConverter;
 import run.halo.app.model.entity.Photo;
 
-import java.util.Date;
-
 /**
+ * Photo dto.
+ *
  * @author ryanwang
- * @date : 2019/3/21
+ * @author guqing
+ * @date 2019-03-21
  */
 @Data
 public class PhotoDTO implements OutputConverter<PhotoDTO, Photo> {
@@ -28,4 +30,6 @@ public class PhotoDTO implements OutputConverter<PhotoDTO, Photo> {
     private String location;
 
     private String description;
+
+    private Long likes;
 }

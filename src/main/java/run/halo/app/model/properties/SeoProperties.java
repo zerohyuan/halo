@@ -9,14 +9,18 @@ package run.halo.app.model.properties;
  */
 public enum SeoProperties implements PropertyEnum {
 
+    /**
+     * Site keywords meta.
+     */
     KEYWORDS("seo_keywords", String.class, ""),
 
+    /**
+     * Site description meta.
+     */
     DESCRIPTION("seo_description", String.class, ""),
 
-    BAIDU_TOKEN("seo_baidu_token", String.class, ""),
-
     /**
-     * 是否禁止爬虫
+     * Disable web spider.
      */
     SPIDER_DISABLED("seo_spider_disabled", Boolean.class, "false");
 

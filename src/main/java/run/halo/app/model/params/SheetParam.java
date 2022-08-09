@@ -1,78 +1,94 @@
 package run.halo.app.model.params;
 
-import cn.hutool.crypto.digest.BCrypt;
-import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
-import run.halo.app.model.dto.base.InputConverter;
-import run.halo.app.model.entity.Sheet;
-import run.halo.app.model.enums.PostStatus;
-import run.halo.app.utils.HaloUtils;
-
-import javax.validation.constraints.Min;
+import java.util.HashSet;
+import java.util.Set;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.util.Date;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
+import run.halo.app.model.dto.base.InputConverter;
+import run.halo.app.model.entity.Sheet;
+import run.halo.app.model.entity.SheetMeta;
+import run.halo.app.model.enums.PostEditorType;
+import run.halo.app.utils.SlugUtils;
 
 /**
  * Sheet param.
  *
  * @author johnniang
  * @author ryanwang
- * @date 19-4-24
+ * @author guqing
+ * @date 2019-4-24
  */
 @Data
-public class SheetParam implements InputConverter<Sheet> {
+@EqualsAndHashCode(callSuper = true)
+public class SheetParam extends BasePostParam implements InputConverter<Sheet> {
 
+    private Set<SheetMetaParam> metas;
+
+    @Override
+    @Size(max = 255, message = "页面别名的字符长度不能超过 {max}")
+    public String getSlug() {
+        return super.getSlug();
+    }
+
+    @Override
     @NotBlank(message = "页面标题不能为空")
     @Size(max = 100, message = "页面标题的字符长度不能超过 {max}")
-    private String title;
+    public String getTitle() {
+        return super.getTitle();
+    }
 
-    private PostStatus status = PostStatus.DRAFT;
+    @Override
+    @Size(max = 255, message = "页面密码的字符长度不能超过 {max}")
+    public String getPassword() {
+        return super.getPassword();
+    }
 
-    private String url;
+    public Set<SheetMeta> getSheetMetas() {
+        Set<SheetMeta> sheetMetasSet = new HashSet<>();
+        if (CollectionUtils.isEmpty(metas)) {
+            return sheetMetasSet;
+        }
 
-    @NotBlank(message = "页面内容不能为空")
-    private String originalContent;
-
-    @Size(max = 255, message = "页面缩略图链接的字符长度不能超过 {max}")
-    private String thumbnail;
-
-    private Boolean disallowComment = false;
-
-    private Date createTime;
-
-    @Size(max = 255, message = "Length of password must not be more than {max}")
-    private String password;
-
-    @Size(max = 255, message = "Length of template must not be more than {max}")
-    private String template;
-
-    @Min(value = 0, message = "Post top priority must not be less than {value}")
-    private Integer topPriority = 0;
+        for (SheetMetaParam sheetMetaParam : metas) {
+            SheetMeta sheetMeta = sheetMetaParam.convertTo();
+            sheetMetasSet.add(sheetMeta);
+        }
+        return sheetMetasSet;
+    }
 
     @Override
     public Sheet convertTo() {
-        if (StringUtils.isBlank(url)) {
-            url = title.replace(".","");
-        }
+        slug = StringUtils.isBlank(slug) ? SlugUtils.slug(title) : SlugUtils.slug(slug);
 
         if (null == thumbnail) {
             thumbnail = "";
         }
 
-        return InputConverter.super.convertTo();
+        if (null == editorType) {
+            editorType = PostEditorType.MARKDOWN;
+        }
+
+        Sheet sheet = InputConverter.super.convertTo();
+        populateContent(sheet);
+        return sheet;
     }
 
     @Override
     public void update(Sheet sheet) {
-        if (StringUtils.isBlank(url)) {
-            url = title.replace(".","");
-        }
+        slug = StringUtils.isBlank(slug) ? SlugUtils.slug(title) : SlugUtils.slug(slug);
 
         if (null == thumbnail) {
             thumbnail = "";
         }
 
+        if (null == editorType) {
+            editorType = PostEditorType.MARKDOWN;
+        }
+        populateContent(sheet);
         InputConverter.super.update(sheet);
     }
 }
